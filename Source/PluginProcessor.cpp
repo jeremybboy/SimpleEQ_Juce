@@ -193,7 +193,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("High Freq bboy" , "high cut freq bboyyyy",juce::NormalisableRange<float>(20.f, 20000.f, 1., 1.), 20000.f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq bboy" , "Peak freq",juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 750.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq bboy" , "Peak freq bboy",juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 750.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak gain bboy" , "Peak gain ",juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
     
