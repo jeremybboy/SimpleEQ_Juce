@@ -22,6 +22,8 @@ public:
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
+    
+    
     void releaseResources() override;
 
    #ifndef JucePlugin_PreferredChannelConfigurations
@@ -52,7 +54,9 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-
+    
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParamaterLayout();
+    juce::AudioProcessorValueTreeState appvts {*this, nullptr, "Parameters", createParamaterLayout()};
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleEQAudioProcessor)
