@@ -102,6 +102,13 @@ void SimpleEQAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlo
     
     leftChain.prepare(spec);
     rightChain.prepare(spec);
+    
+    auto chainSettings = getChainSettings(appvts);
+    auto peakCoefficients= juce::dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    
+    *leftChain.get<ChainPositions::Peak>().coefficients= *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients= *peakCoefficients;
+
 
 }
 
@@ -152,6 +159,15 @@ void SimpleEQAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juc
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
     
+    
+    
+    auto chainSettings = getChainSettings(appvts);
+    auto peakCoefficients= juce::dsp::IIR::Coefficients<float>::makePeakFilter(getSampleRate(), chainSettings.peakFreq, chainSettings.peakQuality, juce::Decibels::decibelsToGain(chainSettings.peakGainInDecibels));
+    
+    *leftChain.get<ChainPositions::Peak>().coefficients= *peakCoefficients;
+    *rightChain.get<ChainPositions::Peak>().coefficients= *peakCoefficients;
+    
+    
     juce::dsp::AudioBlock<float> block(buffer);
     auto leftBlock = block.getSingleChannelBlock(0);
     auto rightBlock= block.getSingleChannelBlock(1);
@@ -191,22 +207,40 @@ void SimpleEQAudioProcessor::setStateInformation (const void* data, int sizeInBy
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
+
+ChainSettings getChainSettings(juce::AudioProcessorValueTreeState& apvts)
+{
+    
+    ChainSettings settings;
+    
+    settings.lowCutFreq =apvts.getRawParameterValue("LowCut Freq")->load();
+    settings.highCutFreq= apvts.getRawParameterValue("high Freq bboy")->load();
+    settings.peakFreq=apvts.getRawParameterValue("peak Freq bboy")->load();
+    settings.peakGainInDecibels=apvts.getRawParameterValue("Peak gain bboy")->load();
+    settings.peakQuality=apvts.getRawParameterValue("Peak quality bboy")->load();
+    settings.lowCutFreq=apvts.getRawParameterValue("LowCut Slope")->load();
+    settings.highCutSlope=apvts.getRawParameterValue("HighCut Slope")->load();
+
+    
+    return settings;
+}
+
 juce::AudioProcessorValueTreeState::ParameterLayout
     SimpleEQAudioProcessor::createParamaterLayout()
 {
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq bboy" , "low cut freq",juce::NormalisableRange<float>(20.f, 20000.f, 1., 1.), 20.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("LowCut Freq" , "LowCut Freq",juce::NormalisableRange<float>(20.f, 20000.f, 1., 1.), 20.f));
     
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("High Freq bboy" , "high cut freq bboyyyy",juce::NormalisableRange<float>(20.f, 20000.f, 1., 1.), 20000.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("high Freq bboy" , "high cut freq bboyyyy",juce::NormalisableRange<float>(20.f, 20000.f, 1., 1.), 20000.f));
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak Freq bboy" , "Peak freq bboy",juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 750.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("peak Freq bboy" , "Peak freq bboy",juce::NormalisableRange<float>(20.f, 20000.f, 1.f, 1.f), 750.f));
     
     layout.add(std::make_unique<juce::AudioParameterFloat>("Peak gain bboy" , "Peak gain ",juce::NormalisableRange<float>(-24.f, 24.f, 0.5f, 1.f), 0.0f));
     
     
-    layout.add(std::make_unique<juce::AudioParameterFloat>("peakquality bboy" , "peak quality ",juce::NormalisableRange<float>(0.1f, 20.f, 0.05f, 1.f), 1.f));
+    layout.add(std::make_unique<juce::AudioParameterFloat>("Peak quality bboy" , "peak quality ",juce::NormalisableRange<float>(0.1f, 20.f, 0.05f, 1.f), 1.f));
     
 
         juce::StringArray stringArray;
